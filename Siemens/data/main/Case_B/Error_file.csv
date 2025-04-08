@@ -1,0 +1,5 @@
+Obtained error,,
+,,
+infinity norm of (PA-PA'),E1,4.44E-16
+infinity norm of (b-Ax),E2,2.98E-13
+infinity norm of (x - x_true),E3,1.36E-12

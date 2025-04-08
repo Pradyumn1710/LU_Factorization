@@ -1,0 +1,6 @@
+# Ignore build folder
+build/
+
+# Ignore environment files
+*.env
+*.env.*
