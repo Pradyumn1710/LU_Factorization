@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define n 53
+#define n 2540
 #define num_matrices 1
 
 extern "C"
@@ -174,24 +174,26 @@ __global__ void lu_solve_kernel(double *A, int *P, double *b, double *x, double 
 int main()
 {
     // Host memory allocations
-    double *h_A, *h_b, *h_x_true, *h_x_computed, *h_L, *h_U;
-    int *h_P;
+    double *h_A, *h_b, *h_b_1, *h_x_true, *h_x_true_1, *h_x_computed, *h_x_computed_1;
+    double *h_L, *h_U, *h_L_1, *h_U_1;
+    int *h_P, *h_P_1;
 
-    double *h_A_1, *h_b_1, *h_x_true_1, *h_x_computed_1, *h_L_1, *h_U_1;
-    int *h_P_1;
+    h_A = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv", n, n);
+    h_b = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/B1_case2.csv", n, 1);
+    h_x_true = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/U_solution.csv", n, 1);
 
-    h_A = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv", n, n);
-    h_b = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/B_matrix_case1.csv", n, 1);
-    h_x_true = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
-
-    h_A_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv", n, n);
-    h_b_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/B1_case2.csv", n, 1);
-    h_x_true_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/Case_1_soln.csv", n, 1);
+    h_b_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/B2_case2.csv", n, 1);
+    h_x_true_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/U_solution_2.csv", n, 1);
 
     h_x_computed = (double *)malloc(num_matrices * n * sizeof(double));
     h_L = (double *)malloc(num_matrices * n * n * sizeof(double));
     h_U = (double *)malloc(num_matrices * n * n * sizeof(double));
     h_P = (int *)malloc(num_matrices * n * sizeof(int));
+
+    h_x_computed_1 = (double *)malloc(num_matrices * n * sizeof(double));
+    h_L_1 = (double *)malloc(num_matrices * n * n * sizeof(double));
+    h_U_1 = (double *)malloc(num_matrices * n * n * sizeof(double));
+    h_P_1 = (int *)malloc(num_matrices * n * sizeof(int));
 
     // Device memory allocations
     double *d_A, *d_b, *d_x, *d_L, *d_U;
@@ -204,31 +206,34 @@ int main()
     cudaMalloc(&d_U, num_matrices * n * n * sizeof(double));
     cudaMalloc(&d_P, num_matrices * n * sizeof(int));
 
-    // Initialize matrices (Replace with actual data loading)
-    // For demonstration, we'll use identity matrix and ones vector
-    // for(int i = 0; i < n*n; i++) h_A[i] = (i/n == i%n) ? 1.0 : 0.0;
-    // for(int i = 0; i < n; i++) h_b[i] = 1.0;
-    // for(int i = 0; i < n; i++) h_x_true[i] = 1.0;
-
-    // Copy to device
+    // Case 1
     cudaMemcpy(d_A, h_A, num_matrices * n * n * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, h_b, num_matrices * n * sizeof(double), cudaMemcpyHostToDevice);
 
-    // Launch kernel
-    dim3 blocks(1);
-    dim3 threads(1);
-    lu_solve_kernel<<<blocks, threads>>>(d_A, d_P, d_b, d_x, d_L, d_U);
+    lu_solve_kernel<<<1, 1>>>(d_A, d_P, d_b, d_x, d_L, d_U);
 
-    // Copy results back
     cudaMemcpy(h_x_computed, d_x, num_matrices * n * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_L, d_L, num_matrices * n * n * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_U, d_U, num_matrices * n * n * sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_P, d_P, num_matrices * n * sizeof(int), cudaMemcpyDeviceToHost);
 
-    // Calculate and print errors
-    e1(h_A, h_L, h_U, h_P);     // E1: Decomposition error ∞-norm
-    e2(h_x_computed, h_x_true); // E2: Relative solution error ∞-norm
-    e3(h_A, h_x_computed, h_b); // E3: Residual norm ∞-norm
+    e1(h_A, h_L, h_U, h_P);
+    e2(h_x_computed, h_x_true);
+    e3(h_A, h_x_computed, h_b);
+
+    // Case 2
+    cudaMemcpy(d_b, h_b_1, num_matrices * n * sizeof(double), cudaMemcpyHostToDevice);
+
+    lu_solve_kernel<<<1, 1>>>(d_A, d_P, d_b, d_x, d_L, d_U);
+
+    cudaMemcpy(h_x_computed_1, d_x, num_matrices * n * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_L_1, d_L, num_matrices * n * n * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_U_1, d_U, num_matrices * n * n * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_P_1, d_P, num_matrices * n * sizeof(int), cudaMemcpyDeviceToHost);
+
+    e1(h_A, h_L_1, h_U_1, h_P_1);
+    e2(h_x_computed_1, h_x_true_1);
+    e3(h_A, h_x_computed_1, h_b_1);
 
     // Cleanup
     free(h_A);
@@ -238,6 +243,14 @@ int main()
     free(h_L);
     free(h_U);
     free(h_P);
+
+    free(h_b_1);
+    free(h_x_true_1);
+    free(h_x_computed_1);
+    free(h_L_1);
+    free(h_U_1);
+    free(h_P_1);
+
     cudaFree(d_A);
     cudaFree(d_b);
     cudaFree(d_x);
