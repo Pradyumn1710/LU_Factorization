@@ -1,0 +1,2 @@
+MatrixSize,BatchSize,CPUTime(s),GPUTime(ms),Speedup
+50,1000,0.007,2.977149,2.52

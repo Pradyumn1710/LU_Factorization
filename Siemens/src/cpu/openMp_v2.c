@@ -132,40 +132,40 @@ int main() {
     lu_decomposition_omp(A, P);
     
     // E1: Factorization accuracy
-    double E1 = compute_E1(A_copy, A, P);
+    // double E1 = compute_E1(A_copy, A, P);
     
-    // E2: Solution accuracy
-    double *b =  read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
-    double *x = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
+    // // E2: Solution accuracy
+    // double *b =  read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
+    // double *x = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
 
-    solve_system_omp(A, P, b, x);
+    // solve_system_omp(A, P, b, x);
     
-    double E2 = 0.0;
-    for(int i=0; i<MATRIX_SIZE; i++) 
-        E2 = fmax(E2, fabs(x[i] - 1.0));
-    E2 /= MATRIX_SIZE;  // Normalize by matrix size
+    // double E2 = 0.0;
+    // for(int i=0; i<MATRIX_SIZE; i++) 
+    //     E2 = fmax(E2, fabs(x[i] - 1.0));
+    // E2 /= MATRIX_SIZE;  // Normalize by matrix size
     
-    // E3: Residual error
-    double *residual = (double *)malloc(MATRIX_SIZE * sizeof(double));
-    for(int i=0; i<MATRIX_SIZE; i++) {
-        residual[i] = b[i];
-        for(int j=0; j<MATRIX_SIZE; j++) 
-            residual[i] -= A_copy[i][j] * x[j];
-    }
-    double E3 = vector_max_norm(residual, MATRIX_SIZE);
+    // // E3: Residual error
+    // double *residual = (double *)malloc(MATRIX_SIZE * sizeof(double));
+    // for(int i=0; i<MATRIX_SIZE; i++) {
+    //     residual[i] = b[i];
+    //     for(int j=0; j<MATRIX_SIZE; j++) 
+    //         residual[i] -= A_copy[i][j] * x[j];
+    // }
+    // double E3 = vector_max_norm(residual, MATRIX_SIZE);
     
-    printf("========== Validation Results ==========\n");
-    printf("PA-LU Error (E1): %.3e\n", E1);
-    printf("Solution Error (E2): %.3e\n", E2);
-    printf("Residual Error (E3): %.3e\n", E3);
+    // printf("========== Validation Results ==========\n");
+    // printf("PA-LU Error (E1): %.3e\n", E1);
+    // printf("Solution Error (E2): %.3e\n", E2);
+    // printf("Residual Error (E3): %.3e\n", E3);
     
-    // Cleanup
-    free_matrix(A);
-    free_matrix(A_copy);
-    free(P);
-    free(b);
-    free(x);
-    free(residual);
+    // // Cleanup
+    // free_matrix(A);
+    // free_matrix(A_copy);
+    // free(P);
+    // free(b);
+    // free(x);
+    // free(residual);
     
     return 0;
 }

@@ -118,69 +118,64 @@ void print_matrix(double** matrix, int rows, int cols) {
 
 
 int main() {
-    int n = 53;
-    // Src/Data/siemens_test/Case_A/Error_file_case1.csv
-    // Src/Data/siemens_test/Case_A/A_matrix_case1.csv
-    // /home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv
-    double** A = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv", n, n);
-    double** A_copy = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv", n, n);
-    double** B_matrix = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
-    double** X_true_matrix = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
+    int n = 1000;
+    int N = 100; // Number of LU runs
 
-    // printf("Yess\n");
-    // print_matrix(X_true_matrix,3, 1);
+    // double * h_A = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv", n, n);
 
+    // Load master matrix once
+    const char* A_path = "/home/pradyumn/Academic/Non_college/Main/Siemens/data/mytests/matrix_1000x1000.csv";
+    double** A_master = read_matrix_from_csv(A_path, n, n);
 
-    // Extract vectors
-    double* b = (double*)malloc(n * sizeof(double));
-    for (int i = 0; i < n; i++) {
-        b[i] = B_matrix[i][0];
+    // Preallocate N copies of A
+    double*** A_batch = (double***)malloc(N * sizeof(double**));
+    for (int k = 0; k < N; k++) {
+        A_batch[k] = (double**)malloc(n * sizeof(double*));
+        for (int i = 0; i < n; i++) {
+            A_batch[k][i] = (double*)malloc(n * sizeof(double));
+            for (int j = 0; j < n; j++) {
+                A_batch[k][i][j] = A_master[i][j];  // Copy before timing
+            }
+        }
     }
-    double* x_true = (double*)malloc(n * sizeof(double));
-    // Uncomment and initialize x_true if needed
-    for (int i = 0; i < n; i++) {
-        x_true[i] = X_true_matrix[i][0];
+
+    // Allocate pivot arrays
+    int** P_batch = (int**)malloc(N * sizeof(int*));
+    for (int k = 0; k < N; k++) {
+        P_batch[k] = (int*)malloc(n * sizeof(int));
     }
-    
+
+    // ---------- Benchmark Starts Here ----------
     clock_t start_time = clock();
 
-    // LU decomposition
-    int* P = (int*)malloc(n * sizeof(int));
-    lu_factorization(A, P, n);
+    for (int k = 0; k < N; k++) {
+        lu_factorization(A_batch[k], P_batch[k], n);
+    }
 
     clock_t end_time = clock();
+    // ---------- Benchmark Ends Here ------------
 
-    double time_taken = ((double)(end_time-start_time));
-    printf("Time taken by Lu is %.12f",time_taken);
-    // // Extract L and U
-    // double** L = (double**)malloc(n * sizeof(double*));
-    // double** U = (double**)malloc(n * sizeof(double*));
-    // for (int i = 0; i < n; i++) {
-    //     L[i] = (double*)malloc(n * sizeof(double));
-    //     U[i] = (double*)malloc(n * sizeof(double));
-    // }
-    // extract_LU(A, L, U, n);
-    
-    // ------ Critical Fix: Solve for x ------
-    // double* y = (double*)malloc(n * sizeof(double));
-    // double* x = (double*)malloc(n * sizeof(double));
-    
+    double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
 
-    // forward_substitution(L, b, y, P, n);  // Uses permutation P internally
-    // backward_substitution(U, y, x, n);
+    printf("LU factorization on %d matrices:\n", N);
+    printf("Total LU time: %.6f seconds\n", time_taken);
+    printf("Average LU time: %.6f ms\n", (time_taken / N) * 1000.0);
 
-    // // Compute error metrics
-    // double E1 = compute_E1(A_copy, L, U, P, n);
-    // double E2 = compute_E2(x, x_true, n);  // Pass computed x and x_true
-    // double E3 = compute_E3(A_copy, x, b, n);  // Pass computed x and original b
+    // Cleanup
+    for (int k = 0; k < N; k++) {
+        for (int i = 0; i < n; i++) {
+            free(A_batch[k][i]);
+        }
+        free(A_batch[k]);
+        free(P_batch[k]);
+    }
+    free(A_batch);
+    free(P_batch);
 
-    // printf("\nE1 (Factorization Accuracy): %.12e\n", E1);
-    // printf("E2 (Solution Accuracy): %.12e\n", E2);
-    // printf("E3 (Residual Norm): %.12e\n", E3);
-
-    // printf("Testing matrix A %f",matrix_condition_number(A_copy,n));
-
-    // Free all allocated memory (add cleanup code here)
+    for (int i = 0; i < n; i++) {
+        free(A_master[i]);
+    }
+    free(A_master);
 
     return 0;
 }

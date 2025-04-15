@@ -184,9 +184,9 @@ int main()
     h_b = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/B_matrix_case1.csv", n, 1);
     h_x_true = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
 
-    h_A_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv", n, n);
-    h_b_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/B1_case2.csv", n, 1);
-    h_x_true_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/Case_1_soln.csv", n, 1);
+    // h_A_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv", n, n);
+    // h_b_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/B1_case2.csv", n, 1);
+    // h_x_true_1 = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/Case_1_soln.csv", n, 1);
 
     h_x_computed = (double *)malloc(num_matrices * n * sizeof(double));
     h_L = (double *)malloc(num_matrices * n * n * sizeof(double));
@@ -204,11 +204,7 @@ int main()
     cudaMalloc(&d_U, num_matrices * n * n * sizeof(double));
     cudaMalloc(&d_P, num_matrices * n * sizeof(int));
 
-    // Initialize matrices (Replace with actual data loading)
-    // For demonstration, we'll use identity matrix and ones vector
-    // for(int i = 0; i < n*n; i++) h_A[i] = (i/n == i%n) ? 1.0 : 0.0;
-    // for(int i = 0; i < n; i++) h_b[i] = 1.0;
-    // for(int i = 0; i < n; i++) h_x_true[i] = 1.0;
+
 
     // Copy to device
     cudaMemcpy(d_A, h_A, num_matrices * n * n * sizeof(double), cudaMemcpyHostToDevice);
