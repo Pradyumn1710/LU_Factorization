@@ -5,6 +5,11 @@ int main() {
     int deviceCount;
     cudaGetDeviceCount(&deviceCount);
 
+    cudaDeviceProp prop;
+cudaGetDeviceProperties(&prop, 0);
+printf("GPU: %s, Compute Capability: %d.%d\n", prop.name, prop.major, prop.minor);
+
+
     if (deviceCount == 0) {
         std::cout << "No CUDA-capable devices found." << std::endl;
         return 0;
