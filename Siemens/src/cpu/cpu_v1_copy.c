@@ -8,11 +8,44 @@
 
 
 // Import the swap_rows function from matrix_utils.c
-extern void swap_rows(double** matrix, int* P, int row1, int row2);
+void swap_rows_(double** A, int* P, int i, int j) {
+    double* temp = A[i];
+    A[i] = A[j];
+    A[j] = temp;
+
+    int tempP = P[i];
+    P[i] = P[j];
+    P[j] = tempP;
+}
 
 // Function to swap two rows and update the pivot array
-extern double** read_matrix_from_csv(const char* filename, int rows, int cols);
+double** read_matrix_from_csv_(const char* filename, int rows, int cols) {
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        fprintf(stderr, "Error: Unable to open file '%s'\n", filename);
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
 
+    double** matrix = (double**)malloc(rows * sizeof(double*));
+    for (int i = 0; i < rows; i++) {
+        matrix[i] = (double*)malloc(cols * sizeof(double));
+    }
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (fscanf(file, "%lf", &matrix[i][j]) != 1) {
+                perror("Failed to read matrix element");
+                fprintf(stderr, "Error reading row %d, col %d\n", i, j);
+                exit(EXIT_FAILURE);
+            }
+            if (j < cols - 1) fgetc(file);  // Consume the comma
+        }
+    }
+
+    fclose(file);
+    return matrix;
+}
 // LU factorization with partial pivoting
 void lu_factorization(double** A, int* P, int n) {
     // Initialised P matrix here , it accounts for swaps
@@ -29,7 +62,7 @@ void lu_factorization(double** A, int* P, int n) {
         }
 
         if (max_index != k) {
-            swap_rows(A, P, k, max_index);
+            swap_rows_(A, P, k, max_index);
         }
 
         for (int i = k + 1; i < n; i++) {
@@ -46,53 +79,6 @@ void lu_factorization(double** A, int* P, int n) {
 }
 
 // Extract L and U from A after LU factorization
-void extract_LU(double** A, double** L, double** U, int n) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            if (i > j) {
-                L[i][j] = A[i][j];
-                U[i][j] = 0.0;
-            } else if (i == j) {
-                L[i][j] = 1.0;
-
-                U[i][j] = A[i][j];
-            } else {
-                L[i][j] = 0.0;
-                U[i][j] = A[i][j];
-            }
-        }
-    }
-}
-
-// Forward substitution: Solves Ly = Pb
-void forward_substitution(double** L, double* b, double* y, int* P, int n) {
-    for (int i = 0; i < n; i++) {
-        y[i] = b[P[i]];
-        for (int j = 0; j < i; j++) {
-            y[i] -= L[i][j] * y[j];
-        }
-    }
-}
-
-// Backward substitution: Solves Ux = y
-void backward_substitution(double** U, double* y, double* x, int n) {
-    for (int i = n - 1; i >= 0; i--) {
-        x[i] = y[i];
-        for (int j = i + 1; j < n; j++) {
-            x[i] -= U[i][j] * x[j];
-        }
-        x[i] /= U[i][i];
-    }
-}
-
-// Compute infinity norm
-extern double vector_infinity_norm(double* v, int n);
-
-extern double compute_E1(double** A, double** L, double** U, int* P, int n);
-
-extern double compute_E2(double* x, double* x_true, int n);
-
-extern double compute_E3(double** A, double* x, double* b, int n);
 
 // Main function
 
@@ -119,13 +105,13 @@ void print_matrix(double** matrix, int rows, int cols) {
 
 int main() {
     int n = 1000;
-    int N = 100; // Number of LU runs
+    int N = 500; // Number of LU runs
 
     // double * h_A = read_matrix_from_csv_flat("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv", n, n);
 
     // Load master matrix once
-    const char* A_path = "/home/pradyumn/Academic/Non_college/Main/Siemens/data/mytests/matrix_1000x1000.csv";
-    double** A_master = read_matrix_from_csv(A_path, n, n);
+    const char* A_path = "/home/pradyumn/Academic/Non_college/Main/Siemens/data/mytests/lu_decomposable_matrix_1000x1000.csv";
+    double** A_master = read_matrix_from_csv_(A_path, n, n);
 
     // Preallocate N copies of A
     double*** A_batch = (double***)malloc(N * sizeof(double**));

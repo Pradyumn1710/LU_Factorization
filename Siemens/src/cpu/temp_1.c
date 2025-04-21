@@ -4,8 +4,8 @@
 #include <math.h>
 #include <string.h>
 
-#define NUM_MATRICES 10000
-#define N 500
+#define NUM_MATRICES 100
+#define N 1000
 #define CACHE_LINE_SIZE 128  // Typical cache line size
 
 typedef struct {
@@ -98,7 +98,7 @@ int main() {
 
     // Read original matrix
     double** orig = read_matrix_from_csv_(
-        "/home/pradyumn/Academic/Non_college/Main/Siemens/data/mytests/matrix_500x500.csv", N, N
+        "/home/pradyumn/Academic/Non_college/Main/Siemens/data/mytests/matrix_1000x1000.csv", N, N
     );
 
     // Create aligned batch with cache-friendly layout

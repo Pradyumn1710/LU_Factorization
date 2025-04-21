@@ -4,8 +4,8 @@
 #include <math.h>
 #include <string.h>
 
-#define NUM_MATRICES 500
-#define MATRIX_SIZE 500
+#define NUM_MATRICES 100
+#define MATRIX_SIZE 1000
 #define OUTER_THREADS 4
 #define INNER_THREADS 3
 #define CACHE_LINE 64
