@@ -1,0 +1,4 @@
+# Format: A_matrix_path B_matrix_path X_true_path matrix_size
+
+/home/pradyumn/.../Case_A/A_matrix_case1.csv /home/pradyumn/.../Case_A/B_matrix_case1.csv /home/pradyumn/.../Case_A/Case_1_soln.csv 53
+/home/pradyumn/.../Case_B/A_matrix_case2.csv /home/pradyumn/.../Case_B/B_matrix_case2.csv /home/pradyumn/.../Case_B/Case_2_soln.csv 53

@@ -114,37 +114,28 @@ void print_matrix(double** matrix, int rows, int cols) {
     }
 } 
 
+void run_test_case(const char* A_path, const char* B_path, const char* X_true_path, int n) {
+    double** A = read_matrix_from_csv(A_path, n, n);
+    double** A_copy = read_matrix_from_csv(A_path, n, n);
+    double** B_matrix = read_matrix_from_csv(B_path, n, 1);
+    double** X_true_matrix = read_matrix_from_csv(X_true_path, n, 1);
 
-int main() {
-    int n = 53;
-
-    double** A = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv", n, n);
-    double** A_copy = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv", n, n);
-    double** B_matrix = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/B_matrix_case1.csv", n, 1);
-    double** X_true_matrix = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
-
-    // Extract vectors
     double* b = (double*)malloc(n * sizeof(double));
+    double* x_true = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) {
         b[i] = B_matrix[i][0];
-    }
-    double* x_true = (double*)malloc(n * sizeof(double));
-    // Uncomment and initialize x_true if needed
-    for (int i = 0; i < n; i++) {
         x_true[i] = X_true_matrix[i][0];
     }
-    
+
     clock_t start_time = clock();
 
-    // LU decomposition
     int* P = (int*)malloc(n * sizeof(int));
     lu_factorization(A, P, n);
 
     clock_t end_time = clock();
-
     double time_taken = (((double)(end_time-start_time))/CLOCKS_PER_SEC);
-    printf("Time taken by Lu is %.12f seconds",time_taken);
-    // Extract L and U
+    printf("Time taken by LU: %.12f seconds\n", time_taken);
+
     double** L = (double**)malloc(n * sizeof(double*));
     double** U = (double**)malloc(n * sizeof(double*));
     for (int i = 0; i < n; i++) {
@@ -152,26 +143,56 @@ int main() {
         U[i] = (double*)malloc(n * sizeof(double));
     }
     extract_LU(A, L, U, n);
-    
-    // ------ Critical Fix: Solve for x ------
+
     double* y = (double*)malloc(n * sizeof(double));
     double* x = (double*)malloc(n * sizeof(double));
-    
-
-    forward_substitution(L, b, y, P, n);  // Uses permutation P internally
+    forward_substitution(L, b, y, P, n);
     backward_substitution(U, y, x, n);
 
-    // Compute error metrics
     double E1 = compute_E1(A_copy, L, U, P, n);
-    double E2 = compute_E2(x, x_true, n);  // Pass computed x and x_true
-    double E3 = compute_E3(A_copy, x, b, n);  // Pass computed x and original b
+    double E2 = compute_E2(x, x_true, n);
+    double E3 = compute_E3(A_copy, x, b, n);
 
-    printf("\nE1 (Factorization Accuracy): %.12e\n", E1);
-    printf("E2 (Solution Accuracy): %.12e\n", E2);
-    printf("E3 (Residual Norm): %.12e\n", E3);
+    printf("E1: %.12e\nE2: %.12e\nE3: %.12e\n", E1, E2, E3);
 
+    // Optional: free memory
+}
 
-    // Free all allocated memory (add cleanup code here)
+int main() {
+
+    run_test_case(
+        "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv",
+        "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/B_matrix_case1.csv",
+        "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv",
+        53
+    );
+
+    run_test_case(
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/B1_case2.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/U_solution.csv",
+        2540
+    );
+    run_test_case(
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/A_matrix.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/B2_case2.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_B/U_solution_2.csv",
+        2540
+    );
+    run_test_case(
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case _C/A_matrix_case3.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case _C/B1_matrix_case3.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case _C/x1_soln_case3.csv",
+        54
+    );
+    run_test_case(
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case _C/A_matrix_case3.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case _C/B2_case3.csv",
+       "/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case _C/x2_soln_case3.csv",
+        54
+    );
+
+    // Add more test cases here...
 
     return 0;
 }
