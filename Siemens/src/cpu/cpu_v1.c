@@ -4,8 +4,6 @@
 #include <sys/stat.h>
 #include <time.h>
 
-// Include all files from the .common folder
-
 
 // Import the swap_rows function from matrix_utils.c
 extern void swap_rows(double** matrix, int* P, int row1, int row2);
@@ -110,26 +108,20 @@ void print_matrix(double** matrix, int rows, int cols) {
     printf("Matrix:\n");
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            printf("%.20f ", matrix[i][j]); // Print each element with 6 decimal precision
+            printf("%.20f ", matrix[i][j]); 
         }
-        printf("\n"); // Move to the next row
+        printf("\n"); 
     }
 } 
 
 
 int main() {
     int n = 53;
-    // Src/Data/siemens_test/Case_A/Error_file_case1.csv
-    // Src/Data/siemens_test/Case_A/A_matrix_case1.csv
-    // /home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv
+
     double** A = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv", n, n);
     double** A_copy = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/A_matrix_case1.csv", n, n);
-    double** B_matrix = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
+    double** B_matrix = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/B_matrix_case1.csv", n, 1);
     double** X_true_matrix = read_matrix_from_csv("/home/pradyumn/Academic/Non_college/Main/Siemens/data/main/Case_A/Case_1_soln.csv", n, 1);
-
-    // printf("Yess\n");
-    // print_matrix(X_true_matrix,3, 1);
-
 
     // Extract vectors
     double* b = (double*)malloc(n * sizeof(double));
@@ -150,35 +142,34 @@ int main() {
 
     clock_t end_time = clock();
 
-    double time_taken = ((double)(end_time-start_time));
-    printf("Time taken by Lu is %.12f",time_taken);
-    // // Extract L and U
-    // double** L = (double**)malloc(n * sizeof(double*));
-    // double** U = (double**)malloc(n * sizeof(double*));
-    // for (int i = 0; i < n; i++) {
-    //     L[i] = (double*)malloc(n * sizeof(double));
-    //     U[i] = (double*)malloc(n * sizeof(double));
-    // }
-    // extract_LU(A, L, U, n);
+    double time_taken = (((double)(end_time-start_time))/CLOCKS_PER_SEC);
+    printf("Time taken by Lu is %.12f seconds",time_taken);
+    // Extract L and U
+    double** L = (double**)malloc(n * sizeof(double*));
+    double** U = (double**)malloc(n * sizeof(double*));
+    for (int i = 0; i < n; i++) {
+        L[i] = (double*)malloc(n * sizeof(double));
+        U[i] = (double*)malloc(n * sizeof(double));
+    }
+    extract_LU(A, L, U, n);
     
     // ------ Critical Fix: Solve for x ------
-    // double* y = (double*)malloc(n * sizeof(double));
-    // double* x = (double*)malloc(n * sizeof(double));
+    double* y = (double*)malloc(n * sizeof(double));
+    double* x = (double*)malloc(n * sizeof(double));
     
 
-    // forward_substitution(L, b, y, P, n);  // Uses permutation P internally
-    // backward_substitution(U, y, x, n);
+    forward_substitution(L, b, y, P, n);  // Uses permutation P internally
+    backward_substitution(U, y, x, n);
 
-    // // Compute error metrics
-    // double E1 = compute_E1(A_copy, L, U, P, n);
-    // double E2 = compute_E2(x, x_true, n);  // Pass computed x and x_true
-    // double E3 = compute_E3(A_copy, x, b, n);  // Pass computed x and original b
+    // Compute error metrics
+    double E1 = compute_E1(A_copy, L, U, P, n);
+    double E2 = compute_E2(x, x_true, n);  // Pass computed x and x_true
+    double E3 = compute_E3(A_copy, x, b, n);  // Pass computed x and original b
 
-    // printf("\nE1 (Factorization Accuracy): %.12e\n", E1);
-    // printf("E2 (Solution Accuracy): %.12e\n", E2);
-    // printf("E3 (Residual Norm): %.12e\n", E3);
+    printf("\nE1 (Factorization Accuracy): %.12e\n", E1);
+    printf("E2 (Solution Accuracy): %.12e\n", E2);
+    printf("E3 (Residual Norm): %.12e\n", E3);
 
-    // printf("Testing matrix A %f",matrix_condition_number(A_copy,n));
 
     // Free all allocated memory (add cleanup code here)
 

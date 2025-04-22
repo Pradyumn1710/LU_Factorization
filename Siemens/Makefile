@@ -9,10 +9,10 @@ BUILD_DIR := build
 
 # Compilers
 CC := gcc
-CFLAGS := -I$(COMMON_DIR) -O2
+CFLAGS := -I$(COMMON_DIR) -O0
 OMPFLAGS := -fopenmp
 NVCC := nvcc
-NVFLAGS := -I$(COMMON_DIR) -O2
+NVFLAGS := -I$(COMMON_DIR) -O0
 
 # Get all common object files
 COMMON_SRC := $(wildcard $(COMMON_DIR)/*.c)
